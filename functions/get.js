@@ -23,8 +23,8 @@ exports.tempGetter = (req, res) => {
   
   if (auth === 'PASSWORD_HERE') {
     db.collection("temp")
-      .orderBy('timestamp')
-      .limit(1440)
+      .orderBy('timestamp', 'desc')
+      .limit(720)
       .get()
       .then(snapshot => {
         res.send(snapshot.docs.map(doc => doc.data()));

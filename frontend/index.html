@@ -27,7 +27,7 @@
         })
         .then(response => {
           let data = response.data;
-          data = data.slice(Math.max(data.length - graphDataSize, 0))
+          data = data.reverse().slice(Math.max(data.length - graphDataSize, 0));
 
           console.log('data', data);
           const ctx = document.getElementById('chart').getContext('2d');
