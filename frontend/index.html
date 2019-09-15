@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Temperature meter</title>
+    <style>
+      #chart {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="chart"></canvas>
+    <select>
+      <option></option>
+    </select>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js" integrity="sha256-S1J4GVHHDMiirir9qsXWc8ZWw74PHHafpsHp5PXtjTs=" crossorigin="anonymous"></script>
+    <script>
+      let graphDataSize = 500;
+
+      function graph() {
+        axios.get('https://europe-west1-brewing2.cloudfunctions.net/getter', {
+          headers: {
+            'Authorization': 'PASSWORD_HERE'
+          }
+        })
+        .then(response => {
+          let data = response.data;
+          data = data.slice(Math.max(data.length - graphDataSize, 0))
+
+          console.log('data', data);
+          const ctx = document.getElementById('chart').getContext('2d');
+          const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.map(t => t.timestamp).map(t => new Date(t).toLocaleString()),
+              datasets: [{
+                label: 'Temperature',
+                backgroundColor: 'rgba(231,76,60, 0.5)',
+                borderColor: 'rgb(231,76,60)',
+                data: data.map(t => t.temp)
+              },
+              {
+                label: 'CPU Temperature',
+                backgroundColor: 'rgba(44,62,80, 0.2)',
+                borderColor: 'rgb(44,62,80)',
+                data: data.map(t => t.cpu_temp)
+              }],
+            }
+          });
+        });
+      };
+
+      window.onload = () => {
+        graph()
+        setInterval(graph, 180000)
+      }
+    </script>
+  </body>
+</html>
