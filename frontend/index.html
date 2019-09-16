@@ -11,25 +11,41 @@
   </head>
   <body>
     <canvas id="chart"></canvas>
-    <select>
-      <option></option>
-    </select>
+    <input id="chart_size" type="number" />
+    <input id="pass" />
+    <button id="pass_button">Save password</button>
+    <button id="refresh">Refresh</button>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js" integrity="sha256-S1J4GVHHDMiirir9qsXWc8ZWw74PHHafpsHp5PXtjTs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha256-oE03O+I6Pzff4fiMqwEGHbdfcW7a3GRRxlL+U49L5sA=" crossorigin="anonymous"></script>
     <script>
       let graphDataSize = 500;
+
+      // Set up password
+      document.getElementById("pass_button").onclick = (e) => {
+        const pass = document.getElementById("pass").value;
+        Cookies.set("brewing2", pass, { expires: 365 });
+        document.cookie = pass;
+      }
+
+      // Set up chart size input
+      const chartSizeInput = document.getElementById("chart_size");
+      chartSizeInput.value = graphDataSize;
+      chartSizeInput.onchange = (e) => {
+        graphDataSize = e.target.value;
+        console.log('Setting graph data size to ' + e.target.value);
+      }
 
       function graph() {
         axios.get('https://europe-west1-brewing2.cloudfunctions.net/getter', {
           headers: {
-            'Authorization': 'PASSWORD_HERE'
+            'Authorization': Cookies.get("brewing2")
           }
         })
         .then(response => {
           let data = response.data;
           data = data.reverse().slice(Math.max(data.length - graphDataSize, 0));
 
-          console.log('data', data);
           const ctx = document.getElementById('chart').getContext('2d');
           const chart = new Chart(ctx, {
             type: 'line',
@@ -51,6 +67,8 @@
           });
         });
       };
+
+      document.getElementById("refresh").onclick = graph;
 
       window.onload = () => {
         graph()
