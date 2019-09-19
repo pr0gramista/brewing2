@@ -1,9 +1,13 @@
 const admin = require("firebase-admin");
 const functions = require("firebase-functions");
 
-admin.initializeApp(functions.config().firebase);
+console.log('functions.config().firebase', functions.config());
+const app = admin.initializeApp({
+  ...functions.config(),
+  databaseURL: 'https://brewing2.firebaseio.com'
+});
 
-let db = admin.firestore();
+const db = admin.database(app);
 
 /**
  * Responds to any HTTP request.
@@ -23,20 +27,18 @@ exports.tempLogger = (req, res) => {
       return;
     }
     
-    db.collection("temp")
-      .add({
-        temp,
-        cpu_temp,
-        timestamp: Date.now()
-      })
-      .then(() => {
-        res.sendStatus(200)
-      })
-      .catch((e) => {
+    db.ref('/readings/' + Date.now()).set({
+      temp,
+      cpu_temp
+    }, (error) => {
+      if (error) {
         console.error("Something went wrong...");
         console.error(e);
         res.sendStatus(500);
-      });
+      } else {
+        res.sendStatus(200)
+      }
+    })
   } else {
   	res.sendStatus(401); 
   }
