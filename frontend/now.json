@@ -2,6 +2,6 @@
   "version": 2,
   "name": "brewing2",
   "builds": [
-    { "src": "frontend/index.html", "use": "@now/static" }
+    { "src": "index.html", "use": "@now/static" }
   ]
 }
